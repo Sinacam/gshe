@@ -20,20 +20,20 @@ import (
 
 var config struct {
 	// flag vars
-	keyPath                  string
-	inPath, outPath          string
-	encode, compress, decode bool
-	overwrite                bool
-	quantization             uint
-	key                      string
+	keyPath                    string
+	inPath, outPath            string
+	encrypt, compress, decrypt bool
+	overwrite                  bool
+	quantization               uint
+	key                        string
 
 	mode int // stores the boolean mode flags as integer
 }
 
 const (
-	modeEncode = iota + 1
+	modeEncrypt = iota + 1
 	modeCompress
-	modeDecode
+	modeDecrypt
 )
 
 func main() {
@@ -41,9 +41,9 @@ func main() {
 	flag.StringVar(&config.keyPath, "k", "", "path to key file")
 	flag.StringVar(&config.key, "p", "", "passkey")
 	flag.UintVar(&config.quantization, "q", 1, "quantization for compression")
-	flag.BoolVar(&config.encode, "e", false, "encode mode")
+	flag.BoolVar(&config.encrypt, "e", false, "encrypt mode")
 	flag.BoolVar(&config.compress, "c", false, "compress mode")
-	flag.BoolVar(&config.decode, "d", false, "decode mode")
+	flag.BoolVar(&config.decrypt, "d", false, "decrypt mode")
 	flag.BoolVar(&config.overwrite, "f", false, "force overwrite existing files")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [options] input_file\n", os.Args[0])
@@ -62,13 +62,13 @@ func main() {
 	ext := filepath.Ext(name)
 
 	modes := 0
-	if config.encode {
+	if config.encrypt {
 		modes++
-		config.mode = modeEncode
+		config.mode = modeEncrypt
 	}
-	if config.decode {
+	if config.decrypt {
 		modes++
-		config.mode = modeDecode
+		config.mode = modeDecrypt
 	}
 	if config.compress {
 		modes++
@@ -86,7 +86,7 @@ func main() {
 		case ".gse":
 			config.mode = modeCompress
 		case ".gsc":
-			config.mode = modeDecode
+			config.mode = modeDecrypt
 		case ".png":
 			fallthrough
 		case ".gif":
@@ -94,7 +94,7 @@ func main() {
 		case ".jpg":
 			fallthrough
 		case ".jpeg":
-			config.mode = modeEncode
+			config.mode = modeEncrypt
 		default:
 			fmt.Fprintln(os.Stderr, "unknown file type")
 			flag.Usage()
@@ -107,17 +107,17 @@ func main() {
 		name = name[:len(name)-len(ext)]
 		outext := ""
 		switch config.mode {
-		case modeEncode:
+		case modeEncrypt:
 			outext = "gse"
 		case modeCompress:
 			outext = "gsc"
-		case modeDecode:
+		case modeDecrypt:
 			outext = "png"
 		}
 		config.outPath = filepath.Join(filepath.Dir(config.inPath), fmt.Sprintf("%v.%v", name, outext))
 	}
 
-	if config.mode == modeEncode || config.mode == modeDecode {
+	if config.mode == modeEncrypt || config.mode == modeDecrypt {
 		if config.key != "" && config.keyPath != "" {
 			fmt.Fprintln(os.Stderr, "two passkeys provided")
 			flag.Usage()
@@ -162,7 +162,7 @@ func main() {
 	}
 
 	switch config.mode {
-	case modeEncode:
+	case modeEncrypt:
 		src, err := readGray(config.inPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -228,7 +228,7 @@ func main() {
 			return
 		}
 
-	case modeDecode:
+	case modeDecrypt:
 		comp := &gshe.CompressedImage{}
 		infile, err := os.Open(config.inPath)
 		if err != nil {

@@ -5,8 +5,8 @@ GSHE is a homomorphic encryption library for grayscale images in Go. GSHE also c
 ```
 app [options] input_file
   -c    compress mode
-  -d    decode mode
-  -e    encode mode
+  -d    decrypt mode
+  -e    encrypt mode
   -f    force overwrite existing files
   -k string
         path to key file
@@ -18,4 +18,4 @@ app [options] input_file
         quantization for compression (default 1)
 ```
 
-If no mode is supplied, then the mode is inferred from the input file extension.
+If no mode is supplied, then the mode is inferred from the input file extension. One of key file or passkey must be provided for encryption and decryption.
