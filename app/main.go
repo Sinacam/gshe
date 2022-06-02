@@ -46,7 +46,7 @@ func main() {
 	flag.BoolVar(&config.decode, "d", false, "decode mode")
 	flag.BoolVar(&config.overwrite, "f", false, "force overwrite existing files")
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage: %s [-o output_file] [-k key_file] [-p passkey] [-q quantization] [-e] [-d] [-c] [-f] input_file\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "usage: %s [options] input_file\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()
