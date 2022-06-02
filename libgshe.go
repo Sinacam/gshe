@@ -9,7 +9,6 @@ import (
 	fselib "github.com/Sinacam/gshe/FiniteStateEntropy/lib"
 )
 
-// TODO: change Image to image.Gray
 // Image is a greyscale image that is possibly padded in width and height
 // to a multiple of 2 with zeros.
 type Image struct {
@@ -71,6 +70,8 @@ func (src source) Seed(seed int64) {
 	return
 }
 
+// EncryptedImage represents an encrypted image.
+// Only half of the image is stored.
 type EncryptedImage struct {
 	Halfimage           []byte
 	Width, Height       int
@@ -78,8 +79,7 @@ type EncryptedImage struct {
 	Salt                []byte // salt used in encryption
 }
 
-// Encrypts the image img using secret key.
-// secret should be either 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
+// Encrypts the image img using a secret key.
 func Encrypt(img *Image, key []byte) (*EncryptedImage, error) {
 	salt, err := genSalt()
 	if err != nil {
@@ -134,6 +134,7 @@ func permuteHalfimage(p []byte, rng *rand.Rand) {
 	}
 }
 
+// CompressedImage represents a compressed image.
 type CompressedImage struct {
 	Quarterimage        []byte
 	Qtable              []byte // quantization table
@@ -218,6 +219,7 @@ func compress(img *EncryptedImage, quantization uint8) (*compressedImage, error)
 	}, nil
 }
 
+// Compresses an encrypted image with given quantization.
 // quantization must be a power of 2.
 func Compress(img *EncryptedImage, quantization uint8) (*CompressedImage, error) {
 	comp, err := compress(img, quantization)
@@ -243,6 +245,7 @@ func Compress(img *EncryptedImage, quantization uint8) (*CompressedImage, error)
 	}, nil
 }
 
+// Decrypts a compressed image with the same secret key used in encryption.
 func Decrypt(img *CompressedImage, key []byte) (*Image, error) {
 	qdiffs := make([]byte, len(img.Quarterimage))
 	n, err := fselib.Decode(qdiffs, img.EncQdiffs)
